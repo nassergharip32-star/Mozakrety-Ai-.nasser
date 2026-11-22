@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1b0d33">
+<title>Mozakrety AI</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{--purple:#1b0d33;--purple2:#2b1748;--purple3:#432568;--yellow:#efff00;--white:#fff;--muted:#c9bdd8}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#120820,#211139);color:var(--white);font-family:Tahoma,Arial,sans-serif;min-height:100vh}
+header{position:sticky;top:0;z-index:10;background:#190d2dee;border-bottom:1px solid #4a3562;padding:14px 5%;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.logo{font-size:clamp(20px,4vw,30px);font-weight:900}.logo span{color:var(--yellow)}.logo b{font-size:28px;margin-left:8px}
+#who{color:var(--muted);font-size:14px}
+main{max-width:1000px;margin:28px auto;padding:0 15px 45px}.screen{display:none}.screen.active{display:block}
+.panel{background:linear-gradient(145deg,#2a1944,#1d1031);border:1px solid #4a3562;border-radius:24px;padding:clamp(18px,4vw,30px);box-shadow:0 16px 40px #0004}
+.center{text-align:center}h1{font-size:clamp(30px,6vw,48px);margin:12px 0}h2{font-size:clamp(24px,4vw,30px);margin:5px 0 14px}p{color:var(--muted);line-height:1.8}
+input[type=text]{width:100%;padding:16px;border-radius:14px;border:1px solid #5a4175;background:#170d27;color:#fff;font-size:18px;margin:12px 0}
+button{border:0;border-radius:15px;padding:15px 22px;background:var(--yellow);color:#211334;font-size:18px;font-weight:900;cursor:pointer}
+button.secondary{background:#432b60;color:white;border:1px solid #71528f}button:disabled{opacity:.5;cursor:not-allowed}
+.login-btn{width:100%;margin-top:8px}.menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px;margin-top:28px}
+.menu button{min-height:150px;font-size:clamp(26px,5vw,38px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.menu small{font-size:15px;font-weight:500;color:#33244a}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.upload{display:block;border:2px dashed #8060a2;border-radius:18px;padding:24px;text-align:center;color:var(--muted);margin:18px 0;cursor:pointer;background:#1a102b}
+.upload input{display:none}.status{background:#180e29;border:1px solid #48335f;border-radius:14px;padding:13px 16px;color:var(--muted);line-height:1.8;margin:12px 0}
+.lesson{font-size:20px;line-height:2.05;white-space:pre-wrap;overflow-wrap:anywhere;letter-spacing:normal;word-spacing:normal;background:#180e29;border:1px solid #50396a;border-radius:18px;padding:22px;unicode-bidi:plaintext}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}.actions button{flex:1;min-width:130px}
+.progress{height:9px;background:#4b3563;border-radius:20px;margin:14px 0;overflow:hidden}.progress span{display:block;height:100%;background:var(--yellow);width:0}
+.result{white-space:pre-wrap;line-height:2;font-size:19px;background:#180e29;border:1px solid #50396a;border-radius:18px;padding:20px;margin-top:15px}
+.question{background:#180e29;border:1px solid #50396a;border-radius:17px;padding:18px;margin:15px 0}
+.choice{display:block;width:100%;text-align:right;margin:9px 0;background:#432b60;color:white;border:1px solid #765692}.choice.selected{outline:2px solid var(--yellow)}
+footer{text-align:center;color:#9b8bac;font-size:12px;margin:24px 0}
+@media(max-width:600px){.menu{grid-template-columns:1fr}.menu button{min-height:115px}.topline{align-items:flex-start}.lesson{font-size:18px;padding:16px}header{padding:12px 15px}}
+</style>
+</head>
+<body>
+<header><div class="logo"><b>🧠</b>Mozakrety <span>AI</span></div><div id="who">مساعدك الذكي للمذاكرة</div></header>
+<main>
+<section id="login" class="screen active"><div class="panel center"><div style="font-size:65px">🧠</div><h1>تسجيل الدخول</h1><p>أهلاً بيك في مذاكرتي AI</p><input type="text" id="studentName" placeholder="اكتب اسمك"><button class="login-btn" onclick="login()">تسجيل الدخول</button></div></section>
+<section id="welcome" class="screen"><div class="panel center"><h1 id="welcomeText">أهلاً يا طالب 👋</h1><p>اختار هتعمل إيه النهارده؟</p><div class="menu">
+<button onclick="openPage('study')">📚 ذاكر<small>افهم الدرس خطوة بخطوة</small></button>
+<button onclick="openPage('summary')">📝 تلخيص دروس<small>ملخص من ملف PDF</small></button>
+<button onclick="openPage('reviews')">🔁 مراجعاتك<small>راجع أهم أجزاء الدرس</small></button>
+<button onclick="openPage('exams')">🧪 امتحاناتك<small>اختبر فهمك</small></button>
+</div></div></section>
+<section id="workspace" class="screen"><div class="panel">
+<div class="topline"><div><h2 id="pageTitle">ذاكر</h2><p id="pageDesc">ارفع ملف PDF عشان نبدأ.</p></div><button class="secondary" onclick="show('welcome')">الرئيسية</button></div>
+<label class="upload">📄 اضغط هنا لاختيار ملف PDF<input type="file" id="pdfFile" accept="application/pdf" onchange="loadPDF(event)"></label>
+<div id="fileStatus" class="status">لم يتم اختيار ملف بعد.</div><div id="workArea"></div>
+</div></section>
+<footer>Mozakrety AI</footer>
+</main>
+<script>
+if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const $=id=>document.getElementById(id);
+let student='',page='',text='',parts=[],part=0,quiz=[],qIndex=0,score=0;
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));$(id).classList.add('active')}
+function login(){let n=$('studentName').value.trim();if(!n){alert('اكتب اسمك الأول');return}student=n;localStorage.setItem('mozakrety_student',n);$('welcomeText').textContent='أهلاً يا '+n+' 👋';$('who').textContent='أهلاً، '+n;show('welcome')}
+function openPage(p){page=p;let data={study:['ذاكر','ارفع ملف PDF وذاكر الدرس جزءًا جزءًا.'],summary:['تلخيص دروس','ارفع ملف PDF لعرض محتواه في صورة نقاط للمراجعة.'],reviews:['مراجعاتك','ارفع ملف PDF لمراجعة أهم أجزاء الدرس.'],exams:['امتحاناتك','ارفع ملف PDF وابدأ اختبارًا تدريبيًا.']};$('pageTitle').textContent=data[p][0];$('pageDesc').textContent=data[p][1];$('pdfFile').value='';$('fileStatus').textContent='لم يتم اختيار ملف بعد.';$('workArea').innerHTML='';text='';show('workspace')}
+async function loadPDF(e){let f=e.target.files[0];if(!f)return;if(!f.name.toLowerCase().endsWith('.pdf'))return alert('اختار ملف PDF');$('fileStatus').textContent='جاري قراءة الملف...';try{let pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;let all=[];for(let i=1;i<=pdf.numPages;i++){let pg=await pdf.getPage(i),tc=await pg.getTextContent();all.push(tc.items.map(x=>x.str).filter(Boolean).join(' '))}text=all.join('\n\n').trim();if(!text)throw Error('الملف لا يحتوي على نص قابل للاستخراج.');$('fileStatus').textContent='تم تحميل '+f.name+' — '+pdf.numPages+' صفحة.';renderSelected()}catch(err){$('fileStatus').textContent='تعذر قراءة الملف: '+err.message}}
+function renderSelected(){if(page==='study')startStudy();if(page==='summary')summary();if(page==='reviews')review();if(page==='exams')examIntro()}
+function divide(){let s=text.split(/(?<=[.!؟?])\s+/).filter(x=>x.trim());if(s.length<2)s=text.split(/\n+/).filter(x=>x.trim());parts=[];for(let i=0;i<s.length;i+=4)parts.push(s.slice(i,i+4).join(' '));if(!parts.length)parts=[text]}
+function startStudy(){divide();part=0;showPart()}
+function showPart(){let pct=Math.round(part/Math.max(1,parts.length)*100);$('workArea').innerHTML=`<div class="status">الجزء ${part+1} من ${parts.length}</div><div class="progress"><span style="width:${pct}%"></span></div><div class="lesson" id="lessonText"></div><p>هل فهمت الجزء ده؟</p><div class="actions"><button onclick="understood()">فهمت ✓</button><button class="secondary" onclick="didntUnderstand()">مفهمتش</button></div><div id="extra"></div>`;$('lessonText').textContent=parts[part]}
+function understood(){if(part<parts.length-1){part++;showPart()}else $('workArea').innerHTML='<h2>ممتاز! خلصت الدرس 🎉</h2><p>تقدر تختبر نفسك في نفس الصفحة.</p><button onclick="createQuiz()">ابدأ الامتحان</button>'}
+function didntUnderstand(){$('extra').innerHTML='<div class="status">ارجع اقرأ الجزء مرة تانية بتركيز. في النسخة دي دي واجهة وتجربة أساسية؛ الشرح التلقائي بالذكاء الاصطناعي يحتاج ربط خدمة AI لاحقًا.</div><button onclick="understood()">نكمل بعد المراجعة</button>'}
+function summary(){let a=text.split(/(?<=[.!؟?])\s+/).filter(x=>x.trim());let chosen=a.filter((x,i)=>i%Math.max(1,Math.ceil(a.length/10))===0).slice(0,10);$('workArea').innerHTML='<h2>ملخص الدرس</h2><div class="result" id="summaryText"></div><p>استخراج مبدئي لأهم أجزاء النص، وليس تلخيصًا مولدًا بالذكاء الاصطناعي.</p><button onclick="copyResult()">نسخ الملخص</button>';$('summaryText').textContent=chosen.join('\n\n')||text.slice(0,3000)}
+function review(){let a=text.split(/(?<=[.!؟?])\s+/).filter(x=>x.trim()).slice(0,15);$('workArea').innerHTML='<h2>مراجعتك</h2><div id="reviewList"></div>';$('reviewList').innerHTML=a.map((x,i)=>'<div class="result"><b>نقطة '+(i+1)+'</b>\n'+esc(x)+'</div>').join('')}
+function examIntro(){$('workArea').innerHTML='<h2>امتحان تدريبي</h2><p>اضغط لبدء اختبار من محتوى الملف.</p><button onclick="createQuiz()">إنشاء الامتحان</button>'}
+function createQuiz(){let s=text.split(/(?<=[.!؟?])\s+/).filter(x=>x.trim().length>30).slice(0,7);quiz=s.map((x,i)=>({q:'أي عبارة من الآتي موجودة في الدرس؟',correct:x,opts:mix([x,'معلومة غير واردة في النص.','اختيار لا يشرح محتوى الدرس.','عبارة غير مرتبطة بالموضوع.'])}));qIndex=0;score=0;showQuestion()}
+function mix(a){return a.sort(()=>Math.random()-.5)}
+function showQuestion(){if(qIndex>=quiz.length){$('workArea').innerHTML='<h2>خلصت الامتحان 🎉</h2><h1>'+score+' من '+quiz.length+'</h1><button onclick="createQuiz()">إعادة الامتحان</button>';return}let q=quiz[qIndex];$('workArea').innerHTML='<div class="status">السؤال '+(qIndex+1)+' من '+quiz.length+'</div><div class="question"><h3>'+q.q+'</h3>'+q.opts.map((x,i)=>'<button class="choice" onclick="choose('+i+')">'+esc(x)+'</button>').join('')+'<div id="feedback"></div></div>'}
+function choose(i){let q=quiz[qIndex],correct=q.opts[i]===q.correct;if(correct)score++;document.querySelectorAll('.choice').forEach(b=>b.disabled=true);$('feedback').innerHTML='<div class="status">'+(correct?'إجابة صحيحة!':'إجابة غير صحيحة. راجع الجزء المرتبط بالسؤال من الدرس.')+'</div><button onclick="qIndex++;showQuestion()">السؤال التالي</button>'}
+function copyResult(){navigator.clipboard?.writeText($('summaryText').textContent).then(()=>alert('تم النسخ')).catch(()=>alert('حدد النص وانسخه'))}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+window.addEventListener('load',()=>{let n=localStorage.getItem('mozakrety_student');if(n){student=n;$('welcomeText').textContent='أهلاً يا '+n+' 👋';$('who').textContent='أهلاً، '+n;show('welcome')}});
+</script>
+</body></html>
